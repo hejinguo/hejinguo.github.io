@@ -31,9 +31,6 @@ define(['san', 'tool'], function (san, tool) {
                     ],
                     checkeds:[]
                 }
-            },
-            _doClickBackBtn: function () {
-                tool.agileRoute('login/login');
             }
         });
         return pageComponent;

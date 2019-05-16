@@ -10,9 +10,9 @@ define(['san', 'tool'], function (san, tool) {
         var pageComponent = san.defineComponent({
             template: templates,
             components: components,
-            _doClickBackBtn: function () {
-                tool.agileRoute('main/login');
-            }
+			_changePaginationEvent:function(data){
+				alert("选择翻页后的回调："+JSON.stringify(data));				
+			}
         });
         return pageComponent;
     }

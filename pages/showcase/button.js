@@ -9,10 +9,7 @@ define(['san', 'tool'], function (san, tool) {
     function _init(templates, components) {
         var pageComponent = san.defineComponent({
             template: templates,
-            components: components,
-            _doClickBackBtn: function () {
-                tool.agileRoute('main/login');
-            }
+            components: components
         });
         return pageComponent;
     }

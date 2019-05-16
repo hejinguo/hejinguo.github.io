@@ -7,14 +7,27 @@ define(['san'], function (san) {
      * 提示信息
      * @type {Function|*}
      */
-    var agileAlert = san.defineComponent({
+    var agileMessage = san.defineComponent({
         template:
-            '<div class="alert alert-{{type}}" role="alert"><slot></slot></div>',
+        '<div s-if="!close" class="alert alert-{{type}}" role="alert">' +
+        '<a s-if="closeable" class="close" on-click="_doClickCloseBtn"><i class="fa fa-close"></i></a>' +
+        // '<a s-if="closeable" class="pull-right" on-click="_doClickCloseBtn" href="javascript:void(0);"><i class="fa fa-close"></i></a>' +
+        '<i s-if="icon" class="fa {{icon}}"></i>' +
+        '<slot></slot></div>',
         initData: function () {
             return {
-                type: 'success'
+                closeable: false,
+                type: 'success',
+                close: false,
+                icon: null
             };
+        },
+        _doClickCloseBtn: function () {
+            this.data.set('close', true);
         }
+        /*attached: function () {
+            this.data.set('title',this.slot()[0].children.length > 0 ? '':'默认提示信息');
+        }*/
     });
 
     /**
@@ -23,7 +36,7 @@ define(['san'], function (san) {
      */
     var agileButton = san.defineComponent({
         template:
-        '<button type="{{scene}}" class="btn btn-{{type}} btn-{{size}}" disabled="{{disabled}}" on-click="_doClickButton">' +
+        '<button type="{{scene}}" class="btn btn-{{size}} btn-{{type}}" disabled="{{disabled}}" on-click="_doClickButton">' +
         '<i s-if="{{icon}}" class="fa {{icon}}"></i> {{realTitle}}' +
         '</button>',
         initData: function () {
@@ -33,7 +46,8 @@ define(['san'], function (san) {
                 scene: 'button',//button submit reset
                 icon: null,//fa-info
                 title: null,
-                disabled: false
+                disabled: false,
+                loading: false
             }
         },
         computed: {
@@ -103,15 +117,103 @@ define(['san'], function (san) {
         _checkedOne: function () {
             var that = this;
             this.nextTick(function () {
-                that.fire('check', {checked: that.data.get('checked')});
+                that.fire('checked', {checked: that.data.get('checked')});
             });
         }
     });
 
+    /**
+     * 分页组件
+     * @type {Function|*}
+     */
+    var agilePagination = san.defineComponent({
+        template:
+        '<nav class="text-center">' +
+        '<ul class="pagination">' +
+        '<template s-if="pageNum > 1">' +
+        '<li><a href="javascript:void(0);" on-click="_changePageNum(1)">首页</a></li>' +
+        '<li><a href="javascript:void(0);" on-click="_changePageNum(prePage)">上一页</a></li>' +
+        '</template>' +
+        '<template s-else>' +
+        '<li class="disabled"><a href="javascript:void(0);">首页</a></li>' +
+        '<li class="disabled"><a href="javascript:void(0);">上一页</a></li>' +
+        '</template>' +
+        '<li s-for="number,index in pageNumbers" class="{{pageNum == number ? \'active\' : \'\'}}">' +
+        '<a href="javascript:void(0);" on-click="_changePageNum(number)">{{number}}</a>' +
+        '</li>' +
+        '<template s-if="pageNum < pages">' +
+        '<li><a href="javascript:void(0);" on-click="_changePageNum(nextPage)">下一页</a></li>' +
+        '<li><a href="javascript:void(0);" on-click="_changePageNum(pages)">尾页</a></li>' +
+        '</template>' +
+        '<template s-else>' +
+        '<li class="disabled"><a href="javascript:void(0);">下一页</a></li>' +
+        '<li class="disabled"><a href="javascript:void(0);">尾页</a></li>' +
+        '</template>' +
+        '</ul>' +
+        '<ul class="pagination-msg">' +
+        '<span>共 {{pages}} 页，当前是第 {{pageNum}} 页，跳转至：</span>' +
+        '<input type="text" style="width:50px;" class="form-control input-sm" value="{{pageNum}}" on-keyup="_inputPageNum($event)" title="输入页码后请按回车键跳转">' +
+        '<span>页</span>' +
+        '</ul>' +
+        '</nav>',
+        initData: function () {
+            return {
+                pageNum: 1,//当前页
+                pages: 0,//总页数
+                total: null,//总记录数
+                pageSize: null,//每页的条数
+                size: null,//当前页的条数
+            }
+        },
+        computed: {
+            pageNumbers: function () {
+                var _pageNum = parseInt(this.data.get('pageNum'));
+                var _pages = parseInt(this.data.get('pages'));
+                var result = new Array();
+                for (var i = 1; i <= _pages; i++) {
+                    if (i >= _pageNum - 2 && i <= _pageNum + 2) {
+                        result.push(i);
+                    }else if(i >= _pageNum - 2 && result.length < 5){
+						result.push(i);
+					}
+                }
+                return result;
+            },
+            prePage:function(){
+                var _pageNum = parseInt(this.data.get('pageNum'));
+                return _pageNum-1;
+            },
+            nextPage:function () {
+                var _pageNum = parseInt(this.data.get('pageNum'));
+                return _pageNum+1;
+            }
+        },
+        _changePageNum: function (pageNum) {
+            this.data.set('pageNum', pageNum);
+            this.fire('change', {
+                pageNum: this.data.get('pageNum'),
+                pageSize: this.data.get('pageSize')
+            });
+        },
+        _inputPageNum: function (e) {
+            if (e.keyCode == 13) {
+                var _pages = parseInt(this.data.get('pages'));
+                var _targetPageNum = e.srcElement.value;
+                if (isNaN(_targetPageNum) || isNaN(parseInt(_targetPageNum)) || parseInt(_targetPageNum) < 1) {
+                    _targetPageNum = 1;
+                } else if (parseInt(_targetPageNum) > _pages) {
+                    _targetPageNum = _pages;
+                }
+                this._changePageNum(_targetPageNum);
+            }
+        }
+    });
+
     return {
-        'sino-agile-alert': agileAlert,
+        'sino-agile-message': agileMessage,
         'sino-agile-button': agileButton,
-        'sino-agile-table': agileTable
+        'sino-agile-table': agileTable,
+        'sino-agile-pagination': agilePagination
     };
 
 });

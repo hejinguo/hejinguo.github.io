@@ -35,6 +35,7 @@ requirejs(['jquery', 'text', 'jquery.bootstrap'], function ($) {
             var _target_template = 'text!../../pages/' + window.location.hash.substr(1) + '.tpl';
 
             requirejs([_target_script, _target_template, 'common.components'], function (defineComponent, templates, components) {
+				//在这里清理page避免页面卡白
                 var pageComponent = defineComponent.init(templates, components);
                 page = new pageComponent();
                 page.attach(document.body);
@@ -45,6 +46,7 @@ requirejs(['jquery', 'text', 'jquery.bootstrap'], function ($) {
             var _target_template = 'text!../../pages/error/404.tpl';
 
             requirejs([_target_script, _target_template, 'common.components'], function (defineComponent, templates, components) {
+				//在这里清理page避免页面卡白
                 var pageComponent = defineComponent.init(templates, components);
                 page = new pageComponent();
                 page.attach(document.body);
