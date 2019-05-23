@@ -115,9 +115,9 @@ define(['san'], function (san) {
             this._checkedOne();
         },
         _checkedOne: function () {
-            var that = this;
+            var _this = this;
             this.nextTick(function () {
-                that.fire('checked', {checked: that.data.get('checked')});
+                _this.fire('checked', {checked: _this.data.get('checked')});
             });
         }
     });
@@ -173,19 +173,19 @@ define(['san'], function (san) {
                 for (var i = 1; i <= _pages; i++) {
                     if (i >= _pageNum - 2 && i <= _pageNum + 2) {
                         result.push(i);
-                    }else if(i >= _pageNum - 2 && result.length < 5){
-						result.push(i);
-					}
+                    } else if (i >= _pageNum - 2 && result.length < 5) {
+                        result.push(i);
+                    }
                 }
                 return result;
             },
-            prePage:function(){
+            prePage: function () {
                 var _pageNum = parseInt(this.data.get('pageNum'));
-                return _pageNum-1;
+                return _pageNum - 1;
             },
-            nextPage:function () {
+            nextPage: function () {
                 var _pageNum = parseInt(this.data.get('pageNum'));
-                return _pageNum+1;
+                return _pageNum + 1;
             }
         },
         _changePageNum: function (pageNum) {
@@ -209,11 +209,121 @@ define(['san'], function (san) {
         }
     });
 
+    /**
+     * 模态窗口
+     * @type {Function|*}
+     */
+    var agileModalDialog = san.defineComponent({
+        template:
+        '<template><div class="modal fade" s-ref="agile-modal-dialog"' +
+        '   tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">' +
+        '<div class="modal-dialog modal-{{size}}" role="document">' +
+        '<div class="modal-content">' +
+        '<div class="modal-header">' +
+        '<button s-if="cancelBtnFlag" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top:0px;">' +
+        '<i class="fa fa-close"></i>' +
+        '</button>' +
+        '<h5 class="modal-title"><i class="fa {{icon}}"></i> {{title}}</h5>' +
+        '</div>' +
+        '<div class="modal-body">' +
+        '<div class="san-modal-content">' +
+        '<slot></slot>' +
+        '</div>' +
+        '<div class="text-center san-modal-buttons">' +
+        '<slot name="buttons"></slot>' +
+        '<button type="button" s-if="cancelBtnFlag" class="btn btn-default btn-sm" data-dismiss="modal">' +
+        '<i class="fa fa-close"></i>关闭' +
+        '</button>' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div></template>',
+        initData: function () {
+            return {
+                title: '模态窗口的标题',
+                show: false,
+                icon: 'fa-windows',
+                size: 'lg',//lg 和 sm
+                // _san_bs_dialog_id: '_san_bs_dialog_' + Math.random().toString().substring(2),
+                cancelBtnFlag: true//默认是否显示关闭按钮
+            };
+        },
+        attached: function () {
+            var _this = this;
+            // $('#' + this.data.get('_san_bs_dialog_id')).on('hide.bs.modal', function (e) {
+            $(_this.ref('agile-modal-dialog')).on('hide.bs.modal', function (e) {
+                _this.data.set('show', false);
+            })
+            this._doDialogModal();
+            this.watch('show', function (value) {
+                this._doDialogModal();
+            });
+        },
+        _doDialogModal: function () {
+            if (this.data.get('show')) {
+                // $('#' + this.data.get('_san_bs_dialog_id')).modal({backdrop: 'static', keyboard: false});
+                $(this.ref('agile-modal-dialog')).modal({backdrop: 'static', keyboard: false});
+            } else {
+                // $('#' + this.data.get('_san_bs_dialog_id')).modal('hide');
+                $(this.ref('agile-modal-dialog')).modal('hide');
+            }
+        }
+    });
+
+    /**
+     * 输入框组件
+     * @type {Function|*}
+     */
+    var agileInput = san.defineComponent({
+        template:
+            '<input type="{{text}}" class="form-control input-{{size}}" readonly="{{readonly}}" disabled="{{disabled}}" placeholder="{{placeholder}}" value="{= value =}">',
+        initData: function () {
+            return {
+                type: 'text',//text 和 password 等原生支持的输入类型
+                placeholder: '',
+                readonly: false,
+                disabled: false,
+                size: 'default',//lg 和 sm
+                value: ''
+            };
+        }
+    });
+
+    /**
+     * 输入框组
+     * @type {Function|*}
+     */
+    var agileInputGroup = san.defineComponent({
+        template:
+        // '<input type="{{text}}" class="form-control input-{{size}}" readonly="{{readonly}}" disabled="{{disabled}}" placeholder="{{placeholder}}" value="{= value =}">',
+        '<div class="input-group">' +
+        '<span class="input-group-addon">￥</span>' +
+        '<input type="text" class="form-control">' +
+        '<span class="input-group-addon">.00</span>' +
+        '</div>',
+        initData: function () {
+            return {
+                prefix: '',
+                suffix: '',
+                type: 'text',//text 和 password 等原生支持的输入类型
+                placeholder: '',
+                readonly: false,
+                disabled: false,
+                size: 'default',//lg 和 sm
+                value: ''
+            };
+        }
+    });
+
     return {
         'sino-agile-message': agileMessage,
         'sino-agile-button': agileButton,
         'sino-agile-table': agileTable,
-        'sino-agile-pagination': agilePagination
+        'sino-agile-pagination': agilePagination,
+        'sino-agile-modal-dialog': agileModalDialog,
+        'sino-agile-input': agileInput,
+        'sino-agile-input-group': agileInputGroup
     };
 
 });

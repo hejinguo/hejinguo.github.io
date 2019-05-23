@@ -6,6 +6,19 @@
     font-size: 14px;
 }
 
+.san-modal-content{
+    max-height: 500px;
+    overflow: auto;
+    border-bottom:1px solid #e5e5e5;
+    padding-bottom: 10px;
+}
+.san-modal-buttons{
+	margin-top: 15px;
+}
+.san-modal-buttons button {
+    margin: 0px 5px;
+}
+
 .pagination {
     display: inline-block;
     padding-left: 0;
