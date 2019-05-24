@@ -1,5 +1,5 @@
 requirejs.config({
-        urlArgs: "bust=" + (new Date()).getTime(),
+        //urlArgs: "bust=" + (new Date()).getTime(),
         baseUrl: 'resources/js',
         paths: {
             // the left side is the module ID,
