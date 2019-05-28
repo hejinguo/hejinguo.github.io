@@ -1,8 +1,16 @@
-.alert {
+.san-checkbox-label, .san-radio-label{
+	font-weight: 400;
+}
+
+.san-alert {
     min-height: 52px;
 }
 
-.alert .close {
+.san-close{
+	font-size: 18px;
+}
+
+.san-alert .san-close {
     font-size: 14px;
 }
 

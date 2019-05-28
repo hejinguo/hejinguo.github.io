@@ -9,8 +9,8 @@ define(['san'], function (san) {
      */
     var agileMessage = san.defineComponent({
         template:
-        '<div s-if="!close" class="alert alert-{{type}}" role="alert">' +
-        '<a s-if="closeable" class="close" on-click="_doClickCloseBtn"><i class="fa fa-close"></i></a>' +
+        '<div s-if="!close" class="alert alert-{{type}} san-alert" role="alert">' +
+        '<a s-if="closeable" class="close san-close" on-click="_doClickCloseBtn"><i class="fa fa-close"></i></a>' +
         // '<a s-if="closeable" class="pull-right" on-click="_doClickCloseBtn" href="javascript:void(0);"><i class="fa fa-close"></i></a>' +
         '<i s-if="icon" class="fa {{icon}}"></i>' +
         '<slot></slot></div>',
@@ -128,7 +128,7 @@ define(['san'], function (san) {
      */
     var agilePagination = san.defineComponent({
         template:
-        '<nav class="text-center">' +
+        '<nav class="text-center">' +//bg-success
         '<ul class="pagination">' +
         '<template s-if="pageNum > 1">' +
         '<li><a href="javascript:void(0);" on-click="_changePageNum(1)">首页</a></li>' +
@@ -220,7 +220,7 @@ define(['san'], function (san) {
         '<div class="modal-dialog modal-{{size}}" role="document">' +
         '<div class="modal-content">' +
         '<div class="modal-header">' +
-        '<button s-if="cancelBtnFlag" type="button" class="close" data-dismiss="modal" aria-label="Close" style="margin-top:0px;">' +
+        '<button s-if="cancelBtnFlag" type="button" class="close san-close" data-dismiss="modal" aria-label="Close" style="margin-top:0px;">' +
         '<i class="fa fa-close"></i>' +
         '</button>' +
         '<h5 class="modal-title"><i class="fa {{icon}}"></i> {{title}}</h5>' +
@@ -232,7 +232,7 @@ define(['san'], function (san) {
         '<div class="text-center san-modal-buttons">' +
         '<slot name="buttons"></slot>' +
         '<button type="button" s-if="cancelBtnFlag" class="btn btn-default btn-sm" data-dismiss="modal">' +
-        '<i class="fa fa-close"></i>关闭' +
+        '<i class="fa fa-close"></i> 关闭' +
         '</button>' +
         '</div>' +
         '</div>' +
@@ -277,14 +277,17 @@ define(['san'], function (san) {
      */
     var agileInput = san.defineComponent({
         template:
-            '<input type="{{text}}" class="form-control input-{{size}}" readonly="{{readonly}}" disabled="{{disabled}}" placeholder="{{placeholder}}" value="{= value =}">',
+        '<input type="{{type}}" class="form-control input-{{size}}" ' +
+        '   maxlength="{{maxlength}}" readonly="{{readonly}}" disabled="{{disabled}}" ' +
+        '   placeholder="{{placeholder}}" value="{= value =}" />',
         initData: function () {
             return {
                 type: 'text',//text 和 password 等原生支持的输入类型
                 placeholder: '',
+                maxlength: '',
                 readonly: false,
                 disabled: false,
-                size: 'default',//lg 和 sm
+                size: 'sm',//lg default 和 sm
                 value: ''
             };
         }
@@ -296,25 +299,186 @@ define(['san'], function (san) {
      */
     var agileInputGroup = san.defineComponent({
         template:
-        // '<input type="{{text}}" class="form-control input-{{size}}" readonly="{{readonly}}" disabled="{{disabled}}" placeholder="{{placeholder}}" value="{= value =}">',
         '<div class="input-group">' +
-        '<span class="input-group-addon">￥</span>' +
-        '<input type="text" class="form-control">' +
-        '<span class="input-group-addon">.00</span>' +
+        '<span s-if="prefix" class="input-group-addon">{{prefix}}</span>' +
+        '<agile-input type="{{type}}" size="{{size}}" ' +
+        '   maxlength="{{maxlength}}" readonly="{{readonly}}" disabled="{{disabled}}" ' +
+        '   placeholder="{{placeholder}}" value="{= value =}" />' +
+        '<span s-if="suffix" class="input-group-addon">{{suffix}}</span>' +
         '</div>',
+        components: {'agile-input': agileInput},
         initData: function () {
             return {
                 prefix: '',
                 suffix: '',
                 type: 'text',//text 和 password 等原生支持的输入类型
                 placeholder: '',
+                maxlength: '',
                 readonly: false,
                 disabled: false,
-                size: 'default',//lg 和 sm
+                size: 'sm',//lg default 和 sm
                 value: ''
             };
         }
     });
+
+    /**
+     * 下拉框组件
+     * @type {Function|*}
+     */
+    var agileSelect = san.defineComponent({
+        template:
+        '<select class="form-control input-{{size}}" value="{= value =}" readonly="{{readonly}}" disabled="{{disabled}}">' +
+        '<option s-for="item,index in options" value="{{item[optionValue]}}">{{item[optionText]}}</option>' + //trackBy
+        '</select>',
+        initData: function () {
+            return {
+                options: [],//下拉选项数组
+                optionValue: 'value',//下拉条目的值
+                optionText: 'text',//下拉条目的显示
+                readonly: false,
+                disabled: false,
+                size: 'sm',
+                value: ''
+                // _san_form_select_id: '_san_form_select' + Math.random().toString().substring(2)
+            };
+        },
+        attached: function () {
+            //默认选择第一项
+            var _value = this.data.get('value');
+            var _options = this.data.get('options');
+            if (!_value && _options && _options.length > 0) {
+                this.data.set('value', _options[0][this.data.get('optionValue')]);
+            }
+            /*var _this = this;
+            _this.watch('options', function (options) {
+                _this.nextTick(function () {
+                    $('#' + _this.data.get('_san_form_select_id')).selectpicker('refresh');
+                });
+            });
+            _this.watch('value', function (value) {
+                $('#' + _this.data.get('_san_form_select_id')).selectpicker('val', value);
+            });*/
+        }
+    });
+
+    /**
+     * 复选框组件
+     * @type {Function|*}
+     */
+    var agileCheckbox = san.defineComponent({
+        template:
+        '<template>' +
+        '<div s-for="item,index in options" class="{{inline ? \'checkbox-inline\' : \'checkbox\'}} {{item[optionDisabled] || disabled ? \'disabled\':\'\'}}" >' + //trackBy
+        '<label class="san-checkbox-label"><input type="checkbox" value="{{item[optionValue]}}" checked="{= value =}" disabled="{{item[optionDisabled] || disabled}}">{{item[optionText]}}</label>' +
+        '</div>' +
+        '</template>',
+        initData: function () {
+            return {
+                inline: false,//是否显示在一行
+                options: [],//选项框内容数组
+                optionValue: 'value',//选项框条目的值
+                optionText: 'text',//选项框条目的显示
+                optionDisabled: 'disabled',//选项框条目是否失效
+                disabled: false,
+                // size: 'sm',
+                value: []
+            };
+        }
+    });
+
+    /**
+     * 单选框组件
+     * @type {Function|*}
+     */
+    var agileRadio = san.defineComponent({
+        template:
+        '<template>' +
+        '<div s-for="item,index in options" class="{{inline ? \'radio-inline\' : \'radio\'}} {{item[optionDisabled] || disabled ? \'disabled\':\'\'}}" >' + //trackBy
+        '<label class="san-radio-label"><input type="radio" value="{{item[optionValue]}}" checked="{= value =}" disabled="{{item[optionDisabled] || disabled}}" name="{{_san_bs_radio_name}}">{{item[optionText]}}</label>' +
+        '</div>' +
+        '</template>',
+        initData: function () {
+            return {
+                inline: false,//是否显示在一行
+                options: [],//选项框内容数组
+                optionValue: 'value',//选项框条目的值
+                optionText: 'text',//选项框条目的显示
+                optionDisabled: 'disabled',//选项框条目是否失效
+                disabled: false,
+                // size: 'sm',
+                value: [],
+                _san_bs_radio_name: '_san_bs_radio_' + Math.random().toString().substring(2)
+            };
+        }
+    });
+
+    /**
+     * 文本域组件
+     * @type {Function|*}
+     */
+    var agileTextarea = san.defineComponent({
+        template: '<textarea class="form-control" on-keydown="_doKeyDownEvent($event)" ' +
+        '   rows="{{rows}}" readonly="{{readonly}}" disabled="{{disabled}}"' +
+        '   placeholder="{{placeholder}}" value="{= value =}"></textarea>',
+        initData: function () {
+            return {
+                rows: 3,
+                placeholder: '',
+                maxlength: '',//暂时未考虑
+                readonly: false,
+                disabled: false,
+                // size: 'sm',//lg default 和 sm
+                value: ''
+            }
+        },
+        _doKeyDownEvent: function (e) {
+            /*var _maxlength = this.data.get('maxlength');
+            var _value = this.data.get('value');
+            if (_maxlength && _value.length >= _maxlength) {
+                e.returnValue = false;
+            } else {
+                e.returnValue = true;
+            }*/
+        }
+    });
+
+    /**
+     * 栅格-Row组件
+     * @type {Function|*}
+     */
+    var agileRow = san.defineComponent({
+        template:
+        '<div class="{{type}}">' +
+        '<div class="row"><slot></slot></div>' +
+        '</div>',
+        initData: function () {
+            return {
+                type: 'container-fluid'//可选值 container 或 container-fluid
+            }
+        }
+    });
+
+    /**
+     * 栅格-Col组件
+     * @type {Function|*}
+     */
+    var agileCol = san.defineComponent({
+        template: '<div class="col-xs-{{xs}} col-sm-{{sm}} col-md-{{md}} col-lg-{{lg}}"><slot></slot></div>',
+        initData: function () {
+            return {
+                offset: 0,//列偏移和列排序,暂不考虑
+                xs: 12,//超小屏幕 手机 (<768px)
+                sm: 6,//小屏幕 平板 (≥768px)
+                md: 4,//中等屏幕 桌面显示器 (≥992px)
+                lg: 4//大屏幕 大桌面显示器 (≥1200px)
+            }
+        }
+    });
+
+    //layout
+
+    //alert 利用modal-dialog 模拟 antd
 
     return {
         'sino-agile-message': agileMessage,
@@ -323,7 +487,13 @@ define(['san'], function (san) {
         'sino-agile-pagination': agilePagination,
         'sino-agile-modal-dialog': agileModalDialog,
         'sino-agile-input': agileInput,
-        'sino-agile-input-group': agileInputGroup
+        'sino-agile-input-group': agileInputGroup,
+        'sino-agile-select': agileSelect,
+        'sino-agile-checkbox': agileCheckbox,
+        'sino-agile-radio': agileRadio,
+        'sino-agile-textarea': agileTextarea,
+        'sino-agile-row': agileRow,
+        'sino-agile-col': agileCol
     };
 
 });
