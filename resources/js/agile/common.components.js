@@ -476,9 +476,44 @@ define(['san'], function (san) {
         }
     });
 
-    //layout
+    /**
+     * 布局Layout组件
+     * @type {Function|*}
+     */
+    var agileLayout = san.defineComponent({
+        template:
+        '<template>' +
+        '<div s-if="north > 0" class="san-layout-north {{northClassName}}" style="height:{{north}}px;">' +
+        '<slot name="north"></slot>' +
+        '</div>' +
+        '<div class="san-layout-center">' +// style="padding:{{north}}px 0px {{south}}px 0px;"
+        '<div s-if="west > 0" class="pull-left {{westClassName}}" style="height:200px;width:{{west}}px;">' +
+        '<slot name="west"></slot>' +
+        '</div>' +
+        // '<div s-if="east > 0" class="pull-right" style="height:100px;">...</div>' +
+        '<div style="height:200px;overflow: auto;"><slot></slot></div>' +
+        '</div>' +
+        '<div s-if="south > 0" class="san-layout-south {{southClassName}}" style="height:{{south}}px;">' +
+        '<slot name="south"></slot>' +
+        '</div>' +
+        '</template>',
+        initData: function () {
+            return {
+                northClassName: '',//北
+                southClassName: '',//南
+                westClassName: '',//西
+                north: 0,
+                south: 0,
+                west: 0
+            }
+        }
+    });
 
-    //alert 利用modal-dialog 模拟 antd
+    //alert 利用modal-dialog 模拟 antd:alert(type:warn,info,danger) confirm
+
+    //notice 方向:left top right bottom
+
+    //form : form-inline form-horizontal
 
     return {
         'sino-agile-message': agileMessage,
@@ -493,7 +528,8 @@ define(['san'], function (san) {
         'sino-agile-radio': agileRadio,
         'sino-agile-textarea': agileTextarea,
         'sino-agile-row': agileRow,
-        'sino-agile-col': agileCol
+        'sino-agile-col': agileCol,
+        'sino-agile-layout': agileLayout
     };
 
 });

@@ -29,7 +29,7 @@ requirejs(['jquery', 'text', 'jquery.bootstrap'], function ($) {
 	var page = null;//路由Hash转场前的Page
 	
     function _changeHashEvent() {
-        //page && page.detach();//开发者在合适的时机手动去调用实例的 attach、detach 等方法。
+        //page && page.detach();//开发者在合适的时机手动去调用实例的 attach、detach 等方法。【动态子组件时:this.layer.dispose();】
         if (window.location.hash) {//如果通过Hash路由访问的时候
             var _target_script = '../../pages/' + window.location.hash.substr(1);
             var _target_template = 'text!../../pages/' + window.location.hash.substr(1) + '.tpl';
